@@ -1,37 +1,17 @@
-1. "main.py" - This file will import and use functions from all other modules. It will also contain the main application loop.
+1. "main.py" and "langchain_agent.py": These two files will share the function names related to the initiation and operation of the Langchain agent. This includes functions for reviewing and refactoring source code files, running the buildCode tool, and handling user requests.
 
-2. "langchain.py" - This file will contain the Langchain class and its methods. It will be used by "main.py" and "langchain_agent.py".
+2. "langchain_agent.py" and "langchain_decorators.py": These files will share decorator function names that are used to enhance the functionality of the Langchain agent.
 
-3. "langchain_decorators.py" - This file will contain decorators for the Langchain class. It will be used by "langchain.py" and "langchain_agent.py".
+3. "langchain_agent.py" and "memory_buffer.py": These files will share variable names related to the memory buffer, which is used to store information during the operation of the Langchain agent.
 
-4. "openai_interface.py" - This file will contain the OpenAI interface class and its methods. It will be used by "main.py" and "langchain_agent.py".
+4. "langchain_agent.py" and "tools.py": These files will share function names related to the tools that the Langchain agent uses to perform its tasks.
 
-5. "memory_buffer.py" - This file will contain the MemoryBuffer class and its methods. It will be used by "main.py", "langchain_agent.py", and "tools.py".
+5. "langchain_agent.py" and "openai_interface.py": These files will share function names and variables related to the interaction with the OpenAI API.
 
-6. "tools.py" - This file will contain various utility functions. It will be used by "main.py", "langchain_agent.py", and "build_code.py".
+6. "langchain_agent.py" and "build_code.py": These files will share function names related to the buildCode tool, which is used to build the project and return compiler warnings or errors.
 
-7. "langchain_agent.py" - This file will contain the LangchainAgent class and its methods. It will use "langchain.py", "openai_interface.py", "memory_buffer.py", and "tools.py".
+7. "main.py" and "logger.py": These files will share function names related to logging operations, including requests to OpenAI and other system components.
 
-8. "build_code.py" - This file will contain the BuildCode class and its methods. It will be used by "main.py" and "langchain_agent.py", and it will use "tools.py".
+8. "main.py" and "requirements.txt": These files will share the names of the required Python packages that need to be installed for the application to run.
 
-9. "logger.py" - This file will contain the Logger class and its methods. It will be used by all other files for logging purposes.
-
-Shared function names:
-- "refactor_code" in "langchain_agent.py"
-- "build_project" in "build_code.py"
-- "log_operation" in "logger.py"
-
-Shared class names:
-- "Langchain" in "langchain.py"
-- "OpenAIInterface" in "openai_interface.py"
-- "MemoryBuffer" in "memory_buffer.py"
-- "LangchainAgent" in "langchain_agent.py"
-- "BuildCode" in "build_code.py"
-- "Logger" in "logger.py"
-
-Shared variable names:
-- "memory_buffer" in "main.py" and "langchain_agent.py"
-- "langchain_agent" in "main.py"
-- "logger" in all files
-
-Note: As this is a Python application, there are no DOM elements or message names involved.
+9. All files: All files will share a common logging function from "logger.py" for debugging purposes.

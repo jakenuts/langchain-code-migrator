@@ -1,40 +1,38 @@
 ```python
 import sys
-from langchain import Langchain
-from langchain_decorators import langchain_decorator
-from openai_interface import OpenAIInterface
-from memory_buffer import MemoryBuffer
-from tools import glob_match, refactor_request
 from langchain_agent import LangchainAgent
-from build_code import BuildCode
 from logger import Logger
+from openai_interface import OpenAIInterface
+from build_code import BuildCode
+from memory_buffer import MemoryBuffer
 
 def main():
     logger = Logger()
     memory_buffer = MemoryBuffer()
-    langchain = Langchain()
     openai_interface = OpenAIInterface()
     build_code = BuildCode()
-    langchain_agent = LangchainAgent(langchain, openai_interface, memory_buffer, logger)
+    langchain_agent = LangchainAgent(logger, memory_buffer, openai_interface, build_code)
 
     while True:
-        logger.log_operation("Requesting refactoring task")
-        task = refactor_request()
-        if not task:
-            logger.log_operation("No refactoring task provided. Exiting.")
+        logger.log("Enter the language of the source code files (typescript, python, c#): ")
+        language = input()
+        logger.log("Enter the glob pattern to match: ")
+        glob_pattern = input()
+        logger.log("Enter the refactoring task: ")
+        refactoring_task = input()
+
+        try:
+            langchain_agent.review_and_refactor_source_code_files(language, glob_pattern, refactoring_task)
+        except Exception as e:
+            logger.log(f"An error occurred: {str(e)}")
+            sys.exit(1)
+
+        logger.log("Do you want to perform another refactoring task? (yes/no): ")
+        user_response = input()
+        if user_response.lower() != 'yes':
             break
 
-        source_files = glob_match(task['glob_pattern'])
-        for file in source_files:
-            logger.log_operation(f"Processing file: {file}")
-            try:
-                langchain_agent.refactor_code(file, task['refactoring'])
-                build_code.build_project(task['build_tool'])
-            except Exception as e:
-                logger.log_operation(f"Error occurred: {str(e)}")
-                continue
-
-        logger.log_operation("Refactoring task completed")
+    logger.log("Application has ended successfully.")
 
 if __name__ == "__main__":
     main()

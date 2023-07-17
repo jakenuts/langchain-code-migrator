@@ -1,32 +1,24 @@
 ```python
-import threading
-from collections import deque
-from logger import Logger
+from langchain.memory import MemoryBuffer
+from logger import log_operation
 
-class MemoryBuffer:
-    def __init__(self, max_size=100):
-        self.buffer = deque(maxlen=max_size)
-        self.lock = threading.Lock()
-        self.logger = Logger(__name__)
+class CustomMemoryBuffer(MemoryBuffer):
+    def __init__(self):
+        super().__init__()
 
-    def add(self, item):
-        with self.lock:
-            self.buffer.append(item)
-            self.logger.log_operation(f"Added item to memory buffer: {item}")
+    @log_operation
+    def store(self, key, value):
+        super().store(key, value)
 
-    def get(self):
-        with self.lock:
-            if len(self.buffer) == 0:
-                return None
-            item = self.buffer.popleft()
-            self.logger.log_operation(f"Retrieved item from memory buffer: {item}")
-            return item
+    @log_operation
+    def retrieve(self, key):
+        return super().retrieve(key)
 
-    def size(self):
-        with self.lock:
-            return len(self.buffer)
+    @log_operation
+    def delete(self, key):
+        super().delete(key)
 
-    def is_empty(self):
-        with self.lock:
-            return len(self.buffer) == 0
+    @log_operation
+    def clear(self):
+        super().clear()
 ```

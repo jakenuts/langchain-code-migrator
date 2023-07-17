@@ -1,25 +1,16 @@
 ```python
 import subprocess
-from logger import Logger
+from logger import log_operation
 
 class BuildCode:
-    def __init__(self):
-        self.logger = Logger(__name__)
+    def __init__(self, build_command):
+        self.build_command = build_command
 
-    def build_project(self, build_command):
+    @log_operation
+    def run_build(self):
         try:
-            self.logger.log_operation(f"Running build command: {build_command}")
-            process = subprocess.Popen(build_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            output, error = process.communicate()
-
-            if process.returncode != 0:
-                self.logger.log_operation(f"Build failed with error: {error.decode('utf-8')}")
-                return False, error.decode('utf-8')
-            else:
-                self.logger.log_operation("Build succeeded")
-                return True, output.decode('utf-8')
-
-        except Exception as e:
-            self.logger.log_operation(f"Exception occurred during build: {str(e)}")
-            return False, str(e)
+            build_process = subprocess.run(self.build_command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return build_process.stdout.decode(), build_process.stderr.decode()
+        except subprocess.CalledProcessError as e:
+            return "", e.output.decode()
 ```

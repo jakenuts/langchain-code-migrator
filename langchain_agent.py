@@ -1,42 +1,58 @@
 ```python
 import glob
-from langchain import Langchain
+from langchain import LangchainAgent, LangchainMemoryBuffer
+from langchain_decorators import log_operation
 from openai_interface import OpenAIInterface
-from memory_buffer import MemoryBuffer
-from tools import match_glob_pattern, refactor_code
-from build_code import BuildCode
+from tools import refactor_code
+from build_code import build_code
 from logger import Logger
 
-class LangchainAgent:
-    def __init__(self, langchain, openai_interface, memory_buffer, build_code, logger):
-        self.langchain = langchain
-        self.openai_interface = openai_interface
-        self.memory_buffer = memory_buffer
-        self.build_code = build_code
-        self.logger = logger
+class CodeRefactorAgent(LangchainAgent):
+    def __init__(self, languages, glob_pattern, build_tool):
+        super().__init__()
+        self.languages = languages
+        self.glob_pattern = glob_pattern
+        self.build_tool = build_tool
+        self.memory_buffer = LangchainMemoryBuffer()
+        self.openai_interface = OpenAIInterface()
+        self.logger = Logger()
 
-    def review_and_refactor(self, language, glob_pattern, refactoring_request):
-        self.logger.log_operation("Review and refactor started.")
-        source_files = glob.glob(glob_pattern)
+    @log_operation
+    def review_source_code(self):
+        for language in self.languages:
+            files = glob.glob(f'**/*.{language}', recursive=True)
+            for file in files:
+                with open(file, 'r') as f:
+                    code = f.read()
+                    self.memory_buffer.store(code)
 
-        for file in source_files:
-            with open(file, 'r') as f:
-                code = f.read()
-                if language == 'python':
-                    matches = match_glob_pattern(code, glob_pattern)
-                    if matches:
-                        refactored_code = refactor_code(code, refactoring_request)
-                        with open(file, 'w') as f:
-                            f.write(refactored_code)
-                        self.logger.log_operation(f"Refactored {file}.")
-                        self.memory_buffer.add(refactored_code)
-                        self.build_and_check(file)
+    @log_operation
+    def refactor_source_code(self, user_request):
+        for language in self.languages:
+            files = glob.glob(f'**/*.{language}', recursive=True)
+            for file in files:
+                with open(file, 'r+') as f:
+                    code = f.read()
+                    refactored_code = refactor_code(code, user_request)
+                    f.seek(0)
+                    f.write(refactored_code)
+                    f.truncate()
 
-    def build_and_check(self, file):
-        build_result = self.build_code.build_project(file)
+    @log_operation
+    def build_project(self):
+        build_result = build_code(self.build_tool)
         if build_result['status'] == 'error':
-            self.logger.log_operation(f"Build error in {file}: {build_result['message']}")
-            self.review_and_refactor('python', '**/*.py', 'refactoring_request')
+            self.logger.log(build_result['message'])
+            return False
+        return True
+
+    @log_operation
+    def run(self, user_request):
+        self.review_source_code()
+        self.refactor_source_code(user_request)
+        build_success = self.build_project()
+        if not build_success:
+            self.run(user_request)
         else:
-            self.logger.log_operation(f"Build successful for {file}.")
+            self.logger.log('Refactoring and build successful.')
 ```
